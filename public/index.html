@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>民宿房源视频编辑台</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>🏡 民宿房源视频编辑台</h1>
+  <div id="user-bar">
+    <label>当前用户</label>
+    <select id="user-select"></select>
+    <button id="btn-resume" title="恢复上次项目（实时校验权限）">↩ 恢复上次项目</button>
+  </div>
+</header>
+
+<nav id="tabs">
+  <button data-tab="property" class="active">房源与房型</button>
+  <button data-tab="materials">素材库</button>
+  <button data-tab="studio">项目时间线</button>
+  <button data-tab="channels">渠道与安全区</button>
+  <button data-tab="publish">发布与导出</button>
+</nav>
+
+<main>
+  <!-- 房源与房型 -->
+  <section id="tab-property" class="tab active">
+    <div class="panel">
+      <h2>房源</h2>
+      <div class="row">
+        <input id="prop-name" placeholder="房源名称，如：山景民宿">
+        <button id="btn-add-prop">新建房源</button>
+      </div>
+      <ul id="prop-list" class="list"></ul>
+    </div>
+    <div class="panel" id="roomtype-panel" hidden>
+      <h2>房型 <span id="rt-prop-name" class="muted"></span></h2>
+      <div class="row">
+        <input id="rt-name" placeholder="房型名称">
+        <input id="rt-desc" placeholder="描述">
+        <button id="btn-add-rt">添加房型</button>
+      </div>
+      <div id="rt-list"></div>
+    </div>
+  </section>
+
+  <!-- 素材库 -->
+  <section id="tab-materials" class="tab">
+    <div class="panel">
+      <h2>素材库 <span id="mat-prop-name" class="muted"></span></h2>
+      <div class="row wrap">
+        <input id="mat-title" placeholder="素材标题">
+        <select id="mat-kind"><option value="video">视频</option><option value="image">图片</option><option value="audio">音频</option></select>
+        <select id="mat-scope"><option value="property_shared">公共（房源级）</option><option value="room_private">私有（房型级）</option></select>
+        <select id="mat-roomtype" hidden></select>
+        <input id="mat-tags" placeholder="标签，逗号分隔（lobby=大厅）">
+        <button id="btn-add-mat">上传素材</button>
+      </div>
+      <p class="hint">大厅等公共素材不能被标成每间房的私有空间；母素材更新后引用它的片段会提示「有新版」。</p>
+      <table id="mat-table">
+        <thead><tr><th>标题</th><th>范围</th><th>空间标注</th><th>版本</th><th>授权</th><th>来源</th><th>操作</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 项目时间线 -->
+  <section id="tab-studio" class="tab">
+    <div class="panel">
+      <h2>项目</h2>
+      <div class="row">
+        <input id="proj-name" placeholder="项目名称">
+        <button id="btn-add-proj">新建项目</button>
+      </div>
+      <ul id="proj-list" class="list"></ul>
+    </div>
+    <div class="panel" id="timeline-panel" hidden>
+      <h2>时间线 <span id="tl-proj-name" class="muted"></span> <span id="tl-script-ver" class="badge"></span></h2>
+      <div class="row">
+        <input id="shot-name" placeholder="镜头名称">
+        <input id="shot-duration" type="number" value="5" min="1" style="width:70px" title="时长(秒)">
+        <button id="btn-add-shot">加镜头</button>
+        <button id="btn-save-version">保存版本快照</button>
+      </div>
+      <div id="shot-list"></div>
+      <h3>加入素材到时间线</h3>
+      <div class="row">
+        <select id="clip-material"></select>
+        <select id="clip-mode">
+          <option value="reference">引用（跟随母版，省空间）</option>
+          <option value="copy">复制到项目（内容固定）</option>
+        </select>
+        <button id="btn-add-clip">加入</button>
+      </div>
+      <table id="clip-table">
+        <thead><tr><th>素材</th><th>方式</th><th>pin版本</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <h3>媒体工作器</h3>
+      <div class="row">
+        <button data-job="render_subtitles" class="btn-job">生成字幕</button>
+        <button data-job="shot_list" class="btn-job">生成镜头清单</button>
+        <button data-job="preview" class="btn-job">生成预览</button>
+      </div>
+      <pre id="job-output" class="output" hidden></pre>
+    </div>
+  </section>
+
+  <!-- 渠道与安全区 -->
+  <section id="tab-channels" class="tab">
+    <div class="panel">
+      <h2>渠道</h2>
+      <div class="row wrap">
+        <input id="ch-name" placeholder="渠道名，如：竖版-短视频">
+        <select id="ch-aspect"><option value="16:9">16:9 横版</option><option value="9:16">9:16 竖版</option></select>
+        <input id="ch-safe" value="10,10,10,10" title="上,右,下,左 安全区内缩%" style="width:130px">
+        <button id="btn-add-ch">新建渠道</button>
+      </div>
+      <ul id="ch-list" class="list"></ul>
+    </div>
+    <div class="panel" id="safe-panel" hidden>
+      <h2>安全区检查 <span class="muted">横竖版共用脚本时，竖版裁切可能遮掉必要提示，必须按渠道重新检查</span></h2>
+      <div id="bind-list"></div>
+      <div id="safe-result"></div>
+    </div>
+  </section>
+
+  <!-- 发布与导出 -->
+  <section id="tab-publish" class="tab">
+    <div class="panel" id="publish-panel" hidden>
+      <h2>发布 <span id="pub-proj-name" class="muted"></span></h2>
+      <div class="row">
+        <button id="btn-publish" class="primary">发布（自动重检素材与规则依赖）</button>
+        <button id="btn-set-cursor">设为首页游标（引用当前最新版本）</button>
+      </div>
+      <div id="publish-result"></div>
+    </div>
+    <div class="panel">
+      <h2>首页游标</h2>
+      <div id="homepage-list"></div>
+    </div>
+    <div class="panel">
+      <h2>导出快照 <span class="muted">保留制作时真实信息，不自动套用当前房型描述</span></h2>
+      <div id="export-list"></div>
+    </div>
+    <div class="panel">
+      <h2>分块上传演示 <span class="muted">幂等重试</span></h2>
+      <div class="row">
+        <button id="btn-upload-demo">模拟上传（含重试）</button>
+      </div>
+      <pre id="upload-log" class="output" hidden></pre>
+    </div>
+  </section>
+</main>
+
+<div id="toast" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "homestay-video-studio",
+  "version": "1.0.0",
+  "description": "民宿房源视频编辑台：Web端维护房型/入住规则/素材时间线，后台API持久化项目，媒体工作器输出字幕/镜头清单/预览",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test test/",
+    "dev": "DB_FILE= node server/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}

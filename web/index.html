@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>民宿房源视频编辑台</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header>
+  <div class="brand">🏠 民宿房源视频编辑台</div>
+  <nav>
+    <a href="#" data-view="home">首页</a>
+    <a href="#" data-view="property">房型与规则</a>
+    <a href="#" data-view="assets">素材库</a>
+    <a href="#" data-view="project">项目时间线</a>
+  </nav>
+  <div class="who">
+    <label>当前用户
+      <select id="userSelect"></select>
+    </label>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<div id="toast" class="toast hidden"></div>
+
+<template id="tpl-home">
+  <section>
+    <h1>我的项目 <small id="today"></small></h1>
+    <p class="hint">首页卡片只引用<strong>游标指向的项目版本</strong>；"恢复上次项目"会立刻重新校验成员权限。</p>
+    <div class="row">
+      <button id="newProjectBtn">新建视频项目</button>
+    </div>
+    <table id="homeTable">
+      <thead><tr><th>项目</th><th>角色</th><th>游标版本</th><th>操作</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</template>
+
+<template id="tpl-property">
+  <section>
+    <h1>房型 · 入住规则 · 设施/窗景</h1>
+    <p class="hint">规则修订<strong>只增不改</strong>，每条带生效日期；设施与窗景绑定具体房型与有效期；大厅等公共素材不出现在任何房型下。</p>
+    <div id="roomList"></div>
+  </section>
+</template>
+
+<template id="tpl-assets">
+  <section>
+    <h1>素材库</h1>
+    <div class="card">
+      <h3>上传（分片，可断点续传）</h3>
+      <div class="row">
+        <input type="file" id="fileInput">
+        <button id="uploadBtn">上传（模拟随机失败可重试）</button>
+        <span id="uploadProg"></span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>登记素材</h3>
+      <div class="grid">
+        <label>标题<input id="aTitle"></label>
+        <label>类型<select id="aKind"><option value="video">video</option><option value="image">image</option><option value="audio">audio</option></select></label>
+        <label>空间属性<select id="aScope"><option value="shared">shared 公共（大厅等）</option><option value="private">private 房型私有</option></select></label>
+        <label>所属房型<select id="aRoom"><option value="">— 公共空间不选 —</option></select></label>
+        <label>空间名（如 大厅/大床房）<input id="aSpace"></label>
+        <label>来源 URI<input id="aSource"></label>
+        <label>sha256（上传后自动填）<input id="aSha"></label>
+        <label>授权方<input id="aLicHolder" value="栖迟民宿（自持素材）"></label>
+        <label>授权起始<input id="aLicFrom" value="2026-01-01"></label>
+        <label>仅缩略图代理？<select id="aThumb"><option value="0">否（完整素材）</option><option value="1">是（不可发布）</option></select></label>
+      </div>
+      <button id="createAssetBtn">登记素材</button>
+    </div>
+    <table id="assetTable">
+      <thead><tr><th>ID</th><th>标题</th><th>空间</th><th>版本</th><th>授权</th><th>来源</th><th>操作</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+</template>
+
+<template id="tpl-project">
+  <section>
+    <h1 id="projTitle">项目时间线</h1>
+    <div class="card">
+      <div class="row">
+        <strong>输出渠道：</strong>
+        <label class="chk"><input type="checkbox" value="landscape_169" class="chBox">横版 16:9</label>
+        <label class="chk"><input type="checkbox" value="douyin" class="chBox">抖音 9:16</label>
+        <label class="chk"><input type="checkbox" value="kuaishou" class="chBox">快手 9:16</label>
+        <label class="chk"><input type="checkbox" value="wechat_story" class="chBox">视频号竖版</label>
+        <label class="chk"><input type="checkbox" value="xiaohongshu" class="chBox">小红书 3:4</label>
+        <span class="spacer"></span>
+        <button id="checkBtn">发布前依赖 & 安全区检查</button>
+        <button id="publishBtn" class="primary">发布（生成字幕/镜头清单/预览）</button>
+      </div>
+      <p class="hint">横竖版共用同一份 16:9 脚本：竖版按居中裁切推导，检查会把每个必要提示先映射过裁切窗、再校验渠道安全区；仅缩略图可看≠素材可用。</p>
+    </div>
+    <div id="checkPanel" class="card hidden"></div>
+    <div id="clips"></div>
+    <div class="card">
+      <h3>添加镜头</h3>
+      <div class="grid">
+        <label>素材<select id="addAsset"></select></label>
+        <label>使用方式<select id="addMode"><option value="reference">引用母素材（跟随提示，不自动替换）</option><option value="copy">复制进项目（独立持有）</option></select></label>
+        <label>时长（秒）<input id="addDur" type="number" value="4" step="0.5"></label>
+        <label>字幕文案<input id="addCaption"></label>
+      </div>
+      <button id="addClipBtn">加入时间线</button>
+    </div>
+    <div class="card">
+      <h3>历史导出（不可变，保留制作时真实信息）</h3>
+      <div id="exportList"></div>
+    </div>
+  </section>
+</template>
+
+<script src="/app.js"></script>
+</body>
+</html>
